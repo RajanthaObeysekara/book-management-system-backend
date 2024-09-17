@@ -39,7 +39,7 @@ async def create_book(request,  db, title, author, isbn, book_image, publishd_da
     db.add(db_book)
     db.commit()
     db.refresh(db_book)
-    return db_book
+    return [db_book]
 
 
 def get_book_by_id(db: Session, id: int, request: Request):
