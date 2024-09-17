@@ -38,23 +38,6 @@ jobs:
           cd book-management-system-backend/ || { echo "Directory not found, exiting"; exit 1; }
           echo "Current directory: $(pwd)"
 
-    # Step 4: Kill the running main.py process (if any)
-    - name: Kill running main.py process
-      uses: appleboy/ssh-action@v0.1.5
-      with:
-        host: ${{ secrets.AWS_SERVER_IP }}
-        username: ${{ secrets.AWS_SSH_USERNAME }}
-        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
-        port: 22
-        script: |
-          RUNNING_PID=$(pgrep -f "python main.py")
-          if [ ! -z "$RUNNING_PID" ]; then
-            sudo kill -9 $RUNNING_PID || { echo "Failed to kill running main.py process, exiting"; exit 1; }
-            echo "Successfully killed the running process."
-          else
-            echo "No running process found for main.py."
-          fi
-
     # Step 5: Pull latest code from the repository
     - name: Pull latest code
       uses: appleboy/ssh-action@v0.1.5
