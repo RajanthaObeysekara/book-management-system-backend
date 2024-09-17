@@ -49,7 +49,7 @@ jobs:
         script: |
           RUNNING_PID=$(pgrep -f "python main.py")
           if [ ! -z "$RUNNING_PID" ]; then
-            kill -9 $RUNNING_PID || { echo "Failed to kill running main.py process, exiting"; exit 1; }
+            sudo kill -9 $RUNNING_PID || { echo "Failed to kill running main.py process, exiting"; exit 1; }
             echo "Successfully killed the running process."
           else
             echo "No running process found for main.py."
