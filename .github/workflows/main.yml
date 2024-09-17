@@ -24,20 +24,14 @@ jobs:
         port: 22
         script: |
           # Step 3: Navigate to the target folder
-          cd /path/to/your/app
-
-          # Step 4: Remove all existing files
-          rm -rf *
-
-          # Step 5: Clone the repository
-          git clone https://github.com/yourusername/yourrepository.git .
-
+          cd book-management-system-backend/
+          
+          # checkout to the correct branch and pull the latest changes
+          git checkout main 
+          git pull
+          
           # Step 6: Set up Python virtual environment
-          python3 -m venv venv
           source venv/bin/activate
-
-          # Step 7: Ensure correct Python interpreter is being used
-          python --version  # Ensure correct interpreter is set
 
           # Step 8: Install dependencies (if any)
           pip install -r requirements.txt
