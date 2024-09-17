@@ -15,8 +15,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: SSH into the AWS server and execute commands
-    - name: Deploy to AWS
+    # Step 2: SSH into the AWS server
+    - name: SSH into AWS Server
       uses: appleboy/ssh-action@v0.1.5
       with:
         host: ${{ secrets.AWS_SERVER_IP }}
@@ -24,54 +24,87 @@ jobs:
         key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          echo "------ Starting deployment process ------"
-          
-          # Log the host and user details (masked for security in logs)
-          echo "Attempting to SSH into server: ${{ secrets.AWS_SERVER_IP }}"
-          echo "Using SSH username: ${{ secrets.AWS_SSH_USERNAME }}"
+          echo "SSH Connection Established"
 
-          # Step 3: Navigate to the target folder
-          echo "Navigating to the target folder: book-management-system-backend/"
+    # Step 3: Navigate to the target folder
+    - name: Navigate to target folder
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
           cd book-management-system-backend/ || { echo "Directory not found, exiting"; exit 1; }
-
-          # Log the current directory to ensure we are in the correct path
           echo "Current directory: $(pwd)"
 
-          # remove the previous main.py file process from the aws
-          echo "Checking for a running instance of main.py..."
+    # Step 4: Kill the running main.py process (if any)
+    - name: Kill running main.py process
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
           RUNNING_PID=$(pgrep -f "python main.py")
           if [ ! -z "$RUNNING_PID" ]; then
-            echo "Found running process for main.py (PID: $RUNNING_PID), killing the process..."
             kill -9 $RUNNING_PID || { echo "Failed to kill running main.py process, exiting"; exit 1; }
             echo "Successfully killed the running process."
           else
             echo "No running process found for main.py."
           fi
-          
-          # Step 4: Checkout to the correct branch and pull the latest changes
-          echo "Checking out to the main branch and pulling the latest changes..."
-          git checkout main 
+
+    # Step 5: Pull latest code from the repository
+    - name: Pull latest code
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          git checkout main
           git pull || { echo "Git pull failed, exiting"; exit 1; }
           echo "Successfully pulled the latest code."
 
-          # Step 5: Set up Python virtual environment
-          echo "Activating Python virtual environment..."
+    # Step 6: Activate virtual environment
+    - name: Activate Python virtual environment
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
           source env/bin/activate || { echo "Failed to activate virtual environment, exiting"; exit 1; }
           echo "Virtual environment activated."
 
-          # Step 6: Install dependencies (if any)
-          echo "Installing dependencies from requirements.txt..."
+    # Step 7: Install dependencies
+    - name: Install dependencies
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
           pip install -r requirements.txt || { echo "Failed to install dependencies, exiting"; exit 1; }
           echo "Dependencies installed successfully."
 
-          # Step 7: Run the Python script
-          echo "Running the Python script: main.py..."
+    # Step 8: Run the Python script
+    - name: Run Python script
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
           python main.py || { echo "Failed to run the Python script, exiting"; exit 1; }
           echo "Python script executed successfully."
-
-          echo "------ Deployment completed successfully ------"
-
-    # This step is for debugging purposes to make sure SSH login is successful
+          
+    # Step 9: Verify SSH connection (for failure handling)
     - name: Verify SSH connection
       if: failure()
       run: echo "Failed to connect via SSH or an error occurred during deployment. Please check the logs."
