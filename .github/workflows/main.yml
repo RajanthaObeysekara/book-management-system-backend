@@ -35,6 +35,17 @@ jobs:
 
           # Log the current directory to ensure we are in the correct path
           echo "Current directory: $(pwd)"
+
+          # remove the previous main.py file process from the aws
+          echo "Checking for a running instance of main.py..."
+          RUNNING_PID=$(pgrep -f "python main.py")
+          if [ ! -z "$RUNNING_PID" ]; then
+            echo "Found running process for main.py (PID: $RUNNING_PID), killing the process..."
+            kill -9 $RUNNING_PID || { echo "Failed to kill running main.py process, exiting"; exit 1; }
+            echo "Successfully killed the running process."
+          else
+            echo "No running process found for main.py."
+          fi
           
           # Step 4: Checkout to the correct branch and pull the latest changes
           echo "Checking out to the main branch and pulling the latest changes..."
@@ -44,7 +55,7 @@ jobs:
 
           # Step 5: Set up Python virtual environment
           echo "Activating Python virtual environment..."
-          source venv/bin/activate || { echo "Failed to activate virtual environment, exiting"; exit 1; }
+          source env/bin/activate || { echo "Failed to activate virtual environment, exiting"; exit 1; }
           echo "Virtual environment activated."
 
           # Step 6: Install dependencies (if any)
