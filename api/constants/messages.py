@@ -1,0 +1,8 @@
+USER_ALREADY_EXISTS = "User already exists"
+USER_CREATED_SUCCESSFUL = "User created successfully"
+USER_NOT_FOUND = "User not found in the database"
+INVALID_REFRESH_TOKEN = "Invalid refresh token"
+INVALID_LOGIN_CREDENTIALS = "Invalid login credentials"
+INVALID_REFRESH_TOKEN = "Invalid refresh token"
+BOOK_NOT_FOUND = "Book not found"
+BOOK_DELETED_SUCCESSFUL = "Book deleted successfully"
