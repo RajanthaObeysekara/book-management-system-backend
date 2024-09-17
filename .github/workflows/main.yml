@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   deploy:
@@ -24,21 +23,43 @@ jobs:
         key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          echo "------ Starting deployment process ------"
+          
+          # Log the host and user details (masked for security in logs)
+          echo "Attempting to SSH into server: ${{ secrets.AWS_SERVER_IP }}"
+          echo "Using SSH username: ${{ secrets.AWS_SSH_USERNAME }}"
+
           # Step 3: Navigate to the target folder
-          cd book-management-system-backend/
+          echo "Navigating to the target folder: book-management-system-backend/"
+          cd book-management-system-backend/ || { echo "Directory not found, exiting"; exit 1; }
+
+          # Log the current directory to ensure we are in the correct path
+          echo "Current directory: $(pwd)"
           
-          # kill if there is any on going process available
-          pkill -f main.py || true
-          
-          # checkout to the correct branch and pull the latest changes
+          # Step 4: Checkout to the correct branch and pull the latest changes
+          echo "Checking out to the main branch and pulling the latest changes..."
           git checkout main 
-          git pull
-          
-          # Step 6: Set up Python virtual environment
-          source env/bin/activate
+          git pull || { echo "Git pull failed, exiting"; exit 1; }
+          echo "Successfully pulled the latest code."
 
-          # Step 8: Install dependencies (if any)
-          pip install -r requirements.txt
+          # Step 5: Set up Python virtual environment
+          echo "Activating Python virtual environment..."
+          source venv/bin/activate || { echo "Failed to activate virtual environment, exiting"; exit 1; }
+          echo "Virtual environment activated."
 
-          # Step 9: Run the Python script
-          python main.py
+          # Step 6: Install dependencies (if any)
+          echo "Installing dependencies from requirements.txt..."
+          pip install -r requirements.txt || { echo "Failed to install dependencies, exiting"; exit 1; }
+          echo "Dependencies installed successfully."
+
+          # Step 7: Run the Python script
+          echo "Running the Python script: main.py..."
+          python main.py || { echo "Failed to run the Python script, exiting"; exit 1; }
+          echo "Python script executed successfully."
+
+          echo "------ Deployment completed successfully ------"
+
+    # This step is for debugging purposes to make sure SSH login is successful
+    - name: Verify SSH connection
+      if: failure()
+      run: echo "Failed to connect via SSH or an error occurred during deployment. Please check the logs."
