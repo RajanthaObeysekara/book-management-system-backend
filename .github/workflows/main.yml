@@ -27,6 +27,9 @@ jobs:
           # Step 3: Navigate to the target folder
           cd book-management-system-backend/
           
+          # kill if there is any on going process available
+          pkill -f main.py || true
+          
           # checkout to the correct branch and pull the latest changes
           git checkout main 
           git pull
