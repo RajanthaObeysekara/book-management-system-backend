@@ -46,7 +46,7 @@ def get_book_by_id(db: Session, id: int, request: Request):
     db_user = validate_user_non_availability_id(db=db, id=request.user.id)
     db_books = db.query(Book).filter(
         Book.id == id, Book.user_id == db_user.id).first()
-    if db_book is None:
+    if db_books is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=messages)
 
@@ -58,7 +58,7 @@ def update_book_cover_image_url(db_books: List[Book]):
     for book in db_books:
         book_dict = book.__dict__.copy()  # Convert the SQLAlchemy model to a dict
         if not book.cover_image.startswith(base_url):
-            book_dict[Book.cover_image] = f"{base_url}{book.cover_image}"
+            book_dict["cover_image"] = f"{base_url}{book.cover_image}"
         updated_books.append(BookResponse.model_validate(
             book_dict))  # Validate with Pydantic
     return updated_books
