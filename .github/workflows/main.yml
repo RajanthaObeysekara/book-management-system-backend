@@ -1,0 +1,46 @@
+name: Deploy to AWS Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: SSH into the AWS server and execute commands
+    - name: Deploy to AWS
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.AWS_SERVER_IP }}
+        username: ${{ secrets.AWS_SSH_USERNAME }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          # Step 3: Navigate to the target folder
+          cd /path/to/your/app
+
+          # Step 4: Remove all existing files
+          rm -rf *
+
+          # Step 5: Clone the repository
+          git clone https://github.com/yourusername/yourrepository.git .
+
+          # Step 6: Set up Python virtual environment
+          python3 -m venv venv
+          source venv/bin/activate
+
+          # Step 7: Ensure correct Python interpreter is being used
+          python --version  # Ensure correct interpreter is set
+
+          # Step 8: Install dependencies (if any)
+          pip install -r requirements.txt
+
+          # Step 9: Run the Python script
+          python main.py
